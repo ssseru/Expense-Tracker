@@ -4,23 +4,22 @@ import {
     FormGroup,
     Label,
     Input,
-    Form
+    Form,
+    Breadcrumb,
+    BreadcrumbItem
 } from "reactstrap";
 import { withRouter } from "react-router-dom";
 import axios from 'axios';
-// const axios_ = axios.create({
-//     baseURL: 'http://localhost:5000',
-//     headers: { 'Content-Type': 'application/json' },
-// })
+import { Link } from "react-router-dom";
 
 class Login extends React.Component {
     constructor(props){
         super(props);
-
         this.state={
-            username:"",
-            password:"",
+            username:"Sai",
+            password:"intelligencealliance",
             access_token:"" ,
+            isAdmin:"" ,
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -34,49 +33,70 @@ class Login extends React.Component {
 
     handleSubmit = event => {
         event.preventDefault();
-        // const data = {
-        //     'username': this.state.username, 
-        //     'password': this.state.password
-        // };
         const headers = {
-            // 'Content-Type': 'application/json',
             'username': this.state.username, 
             'password': this.state.password
           }
         axios.post('/login', {} ,{ headers: headers })
           .then((response) => {
-            this.setState({access_token : response.data.token})
+            this.setState({access_token : response.data.token, isAdmin: response.data.isAdmin})
             console.log(response.data);
             axios.get("/check_auth",{
               headers: {
                 'access_token': this.state.access_token
               }
             })
-            .then(auth => {console.log(auth)})
+            .then(auth => {
+              console.log(this.state.isAdmin)
+              this.props.history.push({
+                pathname: '/dashboard',
+                state: { 
+                  'username': this.state.username, 
+                  'password': this.state.password,
+                  'access_token': this.state.access_token,
+                  'isAdmin': this.state.isAdmin
+                }
+              });
+            })
           }, (error) => {
-            console.log(error.response.data.message);
+            alert(error.response.data.message);
           });
           
-        // this.props.history.push('/dashboard');
         
     }
 
     render()
     {   
         return(
+          <>
             <div className="container">
-                    <Form onSubmit={this.handleSubmit}>
-                        <FormGroup>
-                        <Label for="username">Username</Label>
-                        <Input type="username" id="username" value={this.state.username} onChange={this.handleChange}/>
-                        </FormGroup>
-                        <FormGroup>
-                        <Label for="password">Password</Label>
-                        <Input type="password" id="password" value={this.state.password} onChange={this.handleChange} />
-                        </FormGroup>
-                        <Button type="submit" value="submit" color="primary">Login</Button>
-                    </Form>
+            <div className="row">
+              <Breadcrumb>
+                <BreadcrumbItem>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbItem>
+                <BreadcrumbItem active>Login</BreadcrumbItem>
+              </Breadcrumb>
+              <div className="col-12">
+                <h3 className="pageHead">Login</h3>
+                <hr />
+              </div>
             </div>
+            </div>
+            <div className="container">
+              <Form onSubmit={this.handleSubmit}>
+                  <FormGroup>
+                  <Label for="username">Username</Label>
+                  <Input type="username" id="username" value={this.state.username} onChange={this.handleChange}/>
+                  </FormGroup>
+                  <FormGroup>
+                  <Label for="password">Password</Label>
+                  <Input type="password" id="password" value={this.state.password} onChange={this.handleChange} />
+                  </FormGroup>
+                  <Button type="submit" value="submit" color="primary">Login</Button>
+              </Form>
+            </div>
+          </>
         )
     }
 }

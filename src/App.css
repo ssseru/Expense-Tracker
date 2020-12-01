@@ -25,3 +25,16 @@
   padding: 70px 30px 70px 30px;
   margin: 0px auto;
 }
+
+.forToken {
+  font-size: x-small;
+}
+
+.pageHead {
+  font-size: x-large;
+  color: blueviolet;
+}
+
+.foot {
+  font-size: small;
+}

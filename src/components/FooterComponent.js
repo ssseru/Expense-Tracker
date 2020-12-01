@@ -4,10 +4,10 @@ import {  } from "reactstrap"
 export default function Footer() {
     return(
         <div className="footer">
-            <div className="container">
-                <p>
-                    Expense Tracker made with love
-                </p>
+            <div className="container foot">
+                    FrontEnd: ReactJS          
+                    < hr />
+                    BackEnd: Flask
             </div>
         </div>
     )
