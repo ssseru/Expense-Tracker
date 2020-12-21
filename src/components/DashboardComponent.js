@@ -7,24 +7,71 @@ import {
     Form,
     Breadcrumb,
     BreadcrumbItem,
-    Card
+    Card,
+    CardTitle,
+    CardBody,
+    CardFooter
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import axios from 'axios';
-
+import Transactions from "./TransactionsComponent"
+import { PieChart } from 'react-minimal-pie-chart';
 
 class Dashboard extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
             amount:"",
-            source: "",
-            category: "",
-            expense: ""
+            source: "Salary",
+            category: "Food",
+            expense: "",
+            totalIncome: "",
+            totalExpense: "",
+            listofincomes: [],
+            listofexpenses: [],
+            chartData: [],
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleIncome = this.handleIncome.bind(this)
         this.handleExpense = this.handleExpense.bind(this)
+        this.handleMonthExpense = this.handleMonthExpense.bind(this)
+        this.handleMonthIncome = this.handleMonthIncome.bind(this)
+        this.handleExpenseChart = this.handleExpenseChart.bind(this)
+    }
+
+    componentDidMount() {
+        axios.get("/month_inc",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            this.setState({
+                totalIncome: response.data.total,
+                listofincomes: [...response.data.ans]
+            })
+        }, (error) => {
+        alert(error.response.data.message);
+        });
+
+        axios.get("/month_exp",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            
+            this.setState({
+                totalExpense: response.data.total,
+                listofexpenses: [...response.data.ans]
+            })
+        }, (error) => {
+        alert(error.response.data.message);
+        });
+    }
+
+    componentDidUpdate() {
+        
     }
 
     handleChange(event) {
@@ -35,6 +82,7 @@ class Dashboard extends React.Component {
 
     handleIncome = event => {
         event.preventDefault();
+        console.log(this.state.source)
         const headers = {
             'access_token': this.props.location.state.access_token, 
           }
@@ -52,6 +100,7 @@ class Dashboard extends React.Component {
             amount:"",
             source: ""
         });
+        
     }
 
     handleExpense = event => {
@@ -75,8 +124,75 @@ class Dashboard extends React.Component {
         });
     }
 
+    handleMonthExpense = event => {
+        event.preventDefault();
+        console.log(this.state.listofexpenses)
+        axios.get("/month_exp",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            console.log(response.data.ans)
+            this.setState({
+                totalExpense: response.data.total,
+                listofexpenses: [...response.data.ans]
+            })
+        }, (error) => {
+        alert(error.response.data.message);
+        });
+        
+    }
+    
+    handleMonthIncome = event => {
+        event.preventDefault();
+        axios.get("/month_inc",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            
+            this.setState({
+                totalIncome: response.data.total,
+                listofincomes: [...response.data.ans]
+            })
+        }, (error) => {
+        alert(error.response.data.message);
+        });
+    }
+
+    handleExpenseChart = event => {
+        event.preventDefault()
+        var randomColor = require('randomcolor');
+        axios.get("/exp_split",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            console.log(response.data.ans)  
+            response.data.ans.forEach(function (element) {
+                element.color = randomColor();
+            });
+            this.setState({
+                chartData: [...response.data.ans]
+            })
+        })
+    }
+
     render() {
         const { username, access_token, isAdmin } = this.props.location.state;
+        let trans1 , trans2, chartExpense
+        if(this.state.listofexpenses) {
+            trans2 = <Transactions list={this.state.listofexpenses}/>
+        }
+        if(this.state.listofincomes) {
+            trans1 = <Transactions list={this.state.listofincomes}/>
+        }
+        if(this.state.chartData){
+            chartExpense =  <PieChart data={this.state.chartData}/>
+        }
         return(
             <>
                 <div className="container">
@@ -97,14 +213,24 @@ class Dashboard extends React.Component {
                     </div>
                 </div>
                 <div className="container">
-                    <div className="dashboardHeader">   
-                        <h5>Username: {username}</h5>
-                        <p className="forToken">Access Token: {access_token}</p>
+                    <div className="dashboardHeader row">   
+                        <div className='col-6'>
+                            <h5>Username: {username}</h5>
+                        </div>
+                        <div className="col-3">
+                            <p><b>Total Income:</b> {this.state.totalIncome}</p>
+                        </div>
+                        <div className="col-3">
+                            <p><b>Total Expense:</b> {this.state.totalExpense}</p>
+                        </div>
+                        {/* <p className="forToken">Access Token: {access_token}</p> */}
                     </div>
                     <div className="container">
                         <div className="row">
                             <div className="col-6">
-                                <h5>Add New Income</h5>
+                                <Card>
+                                <CardTitle><h3>Add New Income</h3></CardTitle>
+                                <CardBody>
                                 <Form onSubmit={this.handleIncome}>
                                     <FormGroup>
                                         <Label for="source">Source</Label>
@@ -118,11 +244,16 @@ class Dashboard extends React.Component {
                                         <Label for="amount">Amount</Label>
                                         <Input type="number" id="amount" value={this.state.amount} onChange={this.handleChange} />
                                     </FormGroup>
-                                    <Button type="submit" value="submit" color="primary">Add Income</Button>
+                                    <CardFooter><Button type="submit" value="submit" color="success">Add Income</Button></CardFooter>
                                 </Form>    
+                                </CardBody>
+                                </Card>
                             </div>
                             <div className="col-6">
-                                <h5>Add New Expense</h5>
+                                <Card>
+                                <CardTitle><h3>Add New Expense</h3></CardTitle>
+                                <CardBody>
+
                                 <Form onSubmit={this.handleExpense}>
                                     <FormGroup>
                                         <Label for="category">Category</Label>
@@ -136,10 +267,46 @@ class Dashboard extends React.Component {
                                         <Label for="expense">Amount</Label>
                                         <Input type="number" id="expense" value={this.state.expense} onChange={this.handleChange} />
                                     </FormGroup>
-                                    <Button type="submit" value="submit" color="primary">Add Expense</Button>
+                                    <CardFooter><Button type="submit" value="submit" color="danger">Add Expense</Button></CardFooter>
                                 </Form>
+                                </CardBody>
+                                </Card>
                             </div>
                         </div>
+                        <br />
+                        <div className="row">
+                            <div className="col-6">
+                                <Button onClick={this.handleMonthIncome} type="button" color="success">Update Income History</Button>
+                            </div>
+                            <div className="col-6">
+                                <Button onClick={this.handleMonthExpense} type="button" color="danger">Update Expense History</Button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-6">
+                                <h3>History of Incomes:</h3> 
+                                {trans1}
+                            </div>
+                            <div className="col-6">
+                                <h3>History of Expenses:</h3>
+                                {trans2}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-6">
+                                <Button onClick={this.handleIncomeChart} type="button" color="info">Generate Pie Chart for Incomes</Button>
+                            </div>
+                            <div className="col-6">
+                                <Button onClick={this.handleExpenseChart} type="button" color="info">Generate Pie Chart for Expenses</Button>
+                                {chartExpense}
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             </>

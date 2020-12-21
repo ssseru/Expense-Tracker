@@ -23,7 +23,7 @@ export default function Main() {
                     <Route path="/register" component={Register} />
                     <Redirect to="/home" />
                 </Switch>
-                <Footer />
+                {/* <Footer /> */}
             </div>
             
         )

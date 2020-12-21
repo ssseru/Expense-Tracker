@@ -47,7 +47,6 @@ class Login extends React.Component {
               }
             })
             .then(auth => {
-              console.log(this.state.isAdmin)
               this.props.history.push({
                 pathname: '/dashboard',
                 state: { 

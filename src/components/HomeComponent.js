@@ -2,8 +2,11 @@ import React from 'react';
 import { NavLink } from "react-router-dom"
 import { Breadcrumb, BreadcrumbItem, Nav , NavItem, Navbar } from 'reactstrap';
 import { Link } from "react-router-dom";
+import { PieChart } from 'react-minimal-pie-chart';
 
 function Home() {
+    // var randomColor = require('randomcolor'); // import the script
+    // var color = randomColor(); // a hex code for an attractive color
   return (
       <>
         <div className="container">
@@ -18,8 +21,8 @@ function Home() {
         </div>
         <Navbar>
             <div className="container">
-                <h5 className="col-12">Welcome to expense tracker</h5>
-                <p className="col-12">Login by pressing the login buttton</p>
+                <h5 className="col-12">Welcome!!!</h5>
+                <p className="col-12">If a new user, register first.</p>
             <Nav navbar>
                 {/* <NavItem>
                     <NavLink className="nav-link" to="/home">
@@ -37,6 +40,13 @@ function Home() {
                     </NavLink>
                 </NavItem>
             </Nav>
+            {/* <PieChart
+                data={[
+                    { title: 'One', value:710,color: randomColor() },
+                    { title: 'Two', value: 15 ,color: randomColor()},
+                    { title: 'Three', value: 20,color: randomColor() },
+                ]}
+            />; */}
             </div>
         </Navbar>
     </>

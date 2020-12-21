@@ -3,14 +3,12 @@ import { Jumbotron } from "reactstrap"
 
 export default function Header() {
     return(
-            <Jumbotron>
-                <div className="container">
-                    <div className="row row-header">
-                        <div className="col-12 col-sm-6">
-                            <h1>$$ Expense Tracker $$</h1>
-                        </div>
-                    </div>
-                </div>
-            </Jumbotron>
+        <div>
+        <Jumbotron>
+          <h1 className="display-6">$<b>Expense Tracker</b>$</h1>
+          <p className="lead">This is a website made using ReactJS and Flask which can keep track of your incomes and expenses.</p>
+          <hr className="my-0" />
+        </Jumbotron>
+      </div>
     )
 }
