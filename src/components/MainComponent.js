@@ -11,6 +11,7 @@ import Dashboard from "./DashboardComponent"
 
 import "../App.css"
 import Register from "./RegisterComponent";
+import Admin from "./AdminComponent";
 export default function Main() {
     
         return(
@@ -21,6 +22,7 @@ export default function Main() {
                     <Route path="/login" component={Login} />
                     <Route path="/dashboard" component={Dashboard} />
                     <Route path="/register" component={Register} />
+                    <Route path="/admin" component={Admin} />
                     <Redirect to="/home" />
                 </Switch>
                 {/* <Footer /> */}

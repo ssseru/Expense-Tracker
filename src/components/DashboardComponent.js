@@ -29,7 +29,7 @@ class Dashboard extends React.Component {
             totalExpense: "",
             listofincomes: [],
             listofexpenses: [],
-            chartData: [],
+            chartExpenseData: [],
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleIncome = this.handleIncome.bind(this)
@@ -37,6 +37,7 @@ class Dashboard extends React.Component {
         this.handleMonthExpense = this.handleMonthExpense.bind(this)
         this.handleMonthIncome = this.handleMonthIncome.bind(this)
         this.handleExpenseChart = this.handleExpenseChart.bind(this)
+        this.handleAdmin = this.handleAdmin.bind(this)
     }
 
     componentDidMount() {
@@ -107,21 +108,27 @@ class Dashboard extends React.Component {
         event.preventDefault();
         const headers = {
             'access_token': this.props.location.state.access_token, 
-          }
-        const params ={
+        }
+        var params = {}
+        this.state.category === 'Private' ? params ={
             'category':this.state.category,
-            'amount': this.state.expense
+            'amount': this.state.expense,
+            'private': true ,
+        } : params ={
+            'category':this.state.category,
+            'amount': this.state.expense,
         }
         axios.post('/add_expense', { } ,{ headers: headers, params: params })
-          .then((response) => {
+        .then((response) => {
             alert(response.data.message);
-          }, (error) => {
+        }, (error) => {
             alert(error.response.data.message);
-          });
+        });
         this.setState({
             category:"",
             expense: ""
         });
+
     }
 
     handleMonthExpense = event => {
@@ -176,22 +183,57 @@ class Dashboard extends React.Component {
                 element.color = randomColor();
             });
             this.setState({
-                chartData: [...response.data.ans]
+                chartExpenseData: [...response.data.ans]
+            })
+        })
+        console.log(this.state.chartExpenseData)
+    }
+    
+    handleIncomeChart = event => {
+        event.preventDefault()
+        var randomColor = require('randomcolor');
+        axios.get("/inc_split",{
+            headers: {
+              'access_token': this.props.location.state.access_token, 
+            }
+        })
+        .then((response) => {
+            console.log(response.data.ans)  
+            response.data.ans.forEach(function (element) {
+                element.color = randomColor();
+            });
+            this.setState({
+                chartIncomeData: [...response.data.ans]
             })
         })
     }
 
+    handleAdmin = event => {
+        event.preventDefault()
+        this.props.history.push({
+            pathname: '/admin',
+            state: { 
+              'username': this.props.location.state.username,
+              'access_token': this.props.location.state.access_token,
+              'isAdmin': this.props.location.state.isAdmin
+            }
+        });
+    }
+
     render() {
         const { username, access_token, isAdmin } = this.props.location.state;
-        let trans1 , trans2, chartExpense
+        let trans1 , trans2, chartExpense, chartIncome
         if(this.state.listofexpenses) {
             trans2 = <Transactions list={this.state.listofexpenses}/>
         }
         if(this.state.listofincomes) {
             trans1 = <Transactions list={this.state.listofincomes}/>
         }
-        if(this.state.chartData){
-            chartExpense =  <PieChart data={this.state.chartData}/>
+        if(this.state.chartExpenseData){
+            chartExpense =  <PieChart data={this.state.chartExpenseData} radius={30} />
+        }
+        if(this.state.chartIncomeData){
+            chartIncome =  <PieChart data={this.state.chartIncomeData} radius={30} />
         }
         return(
             <>
@@ -214,8 +256,11 @@ class Dashboard extends React.Component {
                 </div>
                 <div className="container">
                     <div className="dashboardHeader row">   
-                        <div className='col-6'>
+                        <div className='col-4'>
                             <h5>Username: {username}</h5>
+                        </div>
+                        <div className='col-2'>
+                            {isAdmin == true ? <Button onClick={this.handleAdmin} type="button" color="info" >AdminGOD</Button> : <p></p>}
                         </div>
                         <div className="col-3">
                             <p><b>Total Income:</b> {this.state.totalIncome}</p>
@@ -261,6 +306,7 @@ class Dashboard extends React.Component {
                                             <option>Food</option>
                                             <option>Party</option>
                                             <option>Education</option>
+                                            <option>Private</option>
                                         </Input>
                                     </FormGroup>
                                     <FormGroup>
@@ -300,6 +346,7 @@ class Dashboard extends React.Component {
                         <div className="row">
                             <div className="col-6">
                                 <Button onClick={this.handleIncomeChart} type="button" color="info">Generate Pie Chart for Incomes</Button>
+                                {chartIncome}
                             </div>
                             <div className="col-6">
                                 <Button onClick={this.handleExpenseChart} type="button" color="info">Generate Pie Chart for Expenses</Button>
